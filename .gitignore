@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+
+.mypy_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+.venv/
+venv/
+
+relatorio_final.csv

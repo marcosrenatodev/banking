@@ -14,6 +14,25 @@ Mini-projeto em Python para conciliar posições entre um sistema interno e o ex
 - `fixtures/`: arquivos do enunciado para execução imediata
 - `tests/`: suíte `unittest`
 
+## Decisões técnicas
+
+- O domínio usa `Decimal` para valores financeiros, evitando erros de arredondamento com `float` e permitindo aplicar a tolerância de `R$ 0,01` de forma previsível.
+- O de-para entre nome do custodiante e ticker foi modelado em um JSON dedicado e versionável. Para este problema, essa abordagem é mais auditável e determinística do que inferências frágeis por similaridade de texto.
+- A resolução automática foi limitada a um fallback seguro para casos em que o valor do custodiante já parece um ticker, como `KNIP11` ou `HGLG11`.
+- O carregamento das entradas valida presença de campos obrigatórios, tipos numéricos e estrutura mínima dos arquivos, retornando erro amigável em vez de traceback bruto.
+
+## Escopo e tradeoffs
+
+- A entrega foi mantida como script de linha de comando porque o enunciado pede explicitamente um `script` que leia dois arquivos e gere `relatorio_final.csv`.
+- Não foi adicionada interface em React para não deslocar o foco da avaliação, que aqui está na modelagem, robustez, legibilidade e regra de conciliação.
+- Não foi usada API pública para descobrir ticker a partir do nome da empresa. Em cenário real, isso normalmente dependeria de uma fonte mestre de cadastro, provedor de market data ou serviço corporativo confiável. Para o teste, o mapping explícito é a alternativa mais controlada e reproduzível.
+
+## Possíveis evoluções
+
+- Integrar com uma fonte externa confiável de cadastro de ativos, mantendo cache local e trilha de auditoria para novos de-paras.
+- Expor um resumo no terminal com contagem por status além do CSV final.
+- Adicionar uma interface opcional apenas como camada de apresentação, reutilizando a regra de negócio Python sem duplicação.
+
 ## Como executar
 
 ```bash

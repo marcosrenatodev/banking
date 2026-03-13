@@ -1,37 +1,41 @@
 # Conciliadora de Custódia
 
-Mini-projeto em Python para conciliar posições entre um sistema interno e o extrato do custodiante, gerando um relatório CSV de exceções.
+Solução em Python para o teste técnico de conciliação de custódia. O projeto lê a posição do sistema interno, o extrato do custodiante e o de-para entre nome e ticker, compara quantidade e financeiro, ignora diferenças financeiras menores que `R$ 0,01` e gera o arquivo `relatorio_final.csv`.
+
+## Desenvolvedor:
+ Marcos Renato Rocha de Medeiros
 
 ## Requisitos
 
 - Python `3.11+`
 - Nenhuma dependência externa
 
+Os exemplos abaixo assumem que o comando `python` aponta para uma versão compatível. Se no seu ambiente o interpretador disponível tiver outro nome, como `python3.11`, basta substituir nos comandos.
+
 ## Estrutura
 
 - `conciliador.py`: ponto de entrada da aplicação
-- `custody_reconciler/`: regras de domínio, leitura/validação, de-para e conciliação
-- `fixtures/`: arquivos do enunciado para execução imediata
-- `tests/`: suíte `unittest`
+- `custody_reconciler/`: leitura e validação dos arquivos, regras de domínio, de-para e conciliação
+- `fixtures/`: arquivos de exemplo usados na execução padrão
+- `tests/`: suíte de testes com `unittest`
 
 ## Decisões técnicas
 
-- O domínio usa `Decimal` para valores financeiros, evitando erros de arredondamento com `float` e permitindo aplicar a tolerância de `R$ 0,01` de forma previsível.
-- O de-para entre nome do custodiante e ticker foi modelado em um JSON dedicado e versionável. Para este problema, essa abordagem é mais auditável e determinística do que inferências frágeis por similaridade de texto.
-- A resolução automática foi limitada a um fallback seguro para casos em que o valor do custodiante já parece um ticker, como `KNIP11` ou `HGLG11`.
-- O carregamento das entradas valida presença de campos obrigatórios, tipos numéricos e estrutura mínima dos arquivos, retornando erro amigável em vez de traceback bruto.
+- Os valores financeiros usam `Decimal`, o que evita imprecisão com `float` e deixa a tolerância de `R$ 0,01` previsível.
+- O de-para entre o nome do custodiante e o ticker foi mantido em um JSON dedicado, o que deixa a solução simples de auditar e reproduzir.
+- Quando o valor vindo do custodiante já se parece com um ticker válido, o script reaproveita esse valor como fallback seguro.
+- As entradas são validadas antes da conciliação, com mensagens de erro amigáveis em vez de traceback bruto.
 
 ## Escopo e tradeoffs
 
-- A entrega foi mantida como script de linha de comando porque o enunciado pede explicitamente um `script` que leia dois arquivos e gere `relatorio_final.csv`.
-- Não foi adicionada interface em React para não deslocar o foco da avaliação, que aqui está na modelagem, robustez, legibilidade e regra de conciliação.
-- Não foi usada API pública para descobrir ticker a partir do nome da empresa. Em cenário real, isso normalmente dependeria de uma fonte mestre de cadastro, provedor de market data ou serviço corporativo confiável. Para o teste, o mapping explícito é a alternativa mais controlada e reproduzível.
+- A entrega foi mantida como script de linha de comando, que é exatamente o formato pedido no enunciado.
+- O mapping entre nome e ticker faz parte da solução, em vez de depender de consulta externa. Para este desafio, isso deixa o comportamento mais controlado e determinístico.
 
 ## Possíveis evoluções
 
-- Integrar com uma fonte externa confiável de cadastro de ativos, mantendo cache local e trilha de auditoria para novos de-paras.
-- Expor um resumo no terminal com contagem por status além do CSV final.
-- Adicionar uma interface opcional apenas como camada de apresentação, reutilizando a regra de negócio Python sem duplicação.
+- Integrar o de-para com uma fonte confiável de cadastro de ativos, mantendo trilha de auditoria para novos mapeamentos.
+- Exibir no terminal um resumo com contagem por status, além do CSV final.
+- Separar a configuração dos caminhos de entrada em perfis ou ambientes para facilitar uso fora dos fixtures.
 
 ## Como executar
 
@@ -39,7 +43,7 @@ Mini-projeto em Python para conciliar posições entre um sistema interno e o ex
 python conciliador.py
 ```
 
-O comando acima usa os fixtures incluídos no projeto e gera `relatorio_final.csv` no diretório atual. Se o seu ambiente expõe apenas `python3`, use `python3 conciliador.py`.
+Esse comando usa os arquivos da pasta `fixtures/` e gera `relatorio_final.csv` no diretório atual.
 
 ### Parâmetros opcionais
 
@@ -51,8 +55,17 @@ python conciliador.py \
   --output relatorio_final.csv
 ```
 
+Parâmetros disponíveis:
+
+- `--internal`: arquivo JSON com a posição do sistema interno
+- `--custodian`: arquivo CSV com o extrato do custodiante
+- `--mapping`: arquivo JSON com o de-para entre nome e ticker
+- `--output`: caminho do CSV final gerado
+
 ## Como rodar os testes
 
 ```bash
 python -m unittest discover -s tests
 ```
+
+Assim como na execução do script, use um interpretador compatível com Python `3.11+`.

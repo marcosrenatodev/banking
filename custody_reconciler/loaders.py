@@ -16,6 +16,7 @@ TWO_PLACES = Decimal("0.01")
 
 
 def load_internal_positions(path: Path) -> list[Position]:
+    """Carrega e agrega as posicoes do sistema interno a partir de um arquivo JSON."""
     if not path.exists():
         raise ReconciliationError(f"Arquivo do sistema interno não encontrado: {path}")
 
@@ -54,6 +55,7 @@ def load_internal_positions(path: Path) -> list[Position]:
 def load_custodian_positions(
     path: Path, name_mapping: dict[str, str]
 ) -> list[CustodianPosition]:
+    """Carrega as posicoes do custodiante a partir do CSV e resolve seus tickers."""
     if not path.exists():
         raise ReconciliationError(f"Arquivo do custodiante não encontrado: {path}")
 
@@ -97,6 +99,7 @@ def load_custodian_positions(
 
 
 def write_report(path: Path, rows: Iterable[ReconciliationRow]) -> None:
+    """Escreve o relatorio final de conciliacao em formato CSV."""
     try:
         with path.open("w", encoding="utf-8", newline="") as handle:
             writer = csv.DictWriter(
@@ -127,6 +130,7 @@ def write_report(path: Path, rows: Iterable[ReconciliationRow]) -> None:
 def _read_required_string(
     payload: dict[str, object], field_name: str, source_name: str, index: int
 ) -> str:
+    """Le um campo textual obrigatorio e aplica normalizacao basica quando necessario."""
     value = payload.get(field_name)
     if not isinstance(value, str) or not value.strip():
         raise ReconciliationError(
@@ -136,6 +140,7 @@ def _read_required_string(
 
 
 def _parse_quantity(value: object, context: str) -> int:
+    """Converte um valor de quantidade para inteiro validando formato e presenca."""
     if isinstance(value, bool) or value is None:
         raise ReconciliationError(f"Quantidade inválida em {context}.")
     if isinstance(value, int):
@@ -155,6 +160,7 @@ def _parse_quantity(value: object, context: str) -> int:
 
 
 def _parse_decimal(value: object, context: str) -> Decimal:
+    """Converte um valor financeiro para Decimal preservando a validacao de entrada."""
     if isinstance(value, bool) or value is None:
         raise ReconciliationError(f"Valor financeiro inválido em {context}.")
     try:
@@ -167,12 +173,14 @@ def _parse_decimal(value: object, context: str) -> Decimal:
 
 
 def _format_decimal(value: Decimal) -> str:
+    """Formata valores financeiros com duas casas decimais e arredondamento comercial."""
     return f"{value.quantize(TWO_PLACES, rounding=ROUND_HALF_UP):f}"
 
 
 def _accumulate_internal(
     aggregated: OrderedDict[str, Position], position: Position
 ) -> None:
+    """Soma posicoes internas repetidas agrupando-as pelo ticker."""
     existing = aggregated.get(position.ticker)
     if existing is None:
         aggregated[position.ticker] = position
@@ -187,6 +195,7 @@ def _accumulate_internal(
 def _accumulate_custodian(
     aggregated: OrderedDict[str, CustodianPosition], position: CustodianPosition
 ) -> None:
+    """Soma posicoes do custodiante repetidas agrupando-as pelo ticker resolvido."""
     existing = aggregated.get(position.ticker)
     if existing is None:
         aggregated[position.ticker] = position

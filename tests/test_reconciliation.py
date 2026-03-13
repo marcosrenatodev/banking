@@ -25,7 +25,9 @@ from custody_reconciler.reconciliation import reconcile_positions
 
 
 class ReconciliationFlowTests(unittest.TestCase):
+    """Agrupa cenarios que validam o fluxo principal de conciliacao."""
     def test_end_to_end_fixture_generates_expected_csv(self) -> None:
+        """Valida o fluxo completo com fixtures e confere o CSV final esperado."""
         with tempfile.TemporaryDirectory() as temp_dir:
             output_path = Path(temp_dir) / "relatorio_final.csv"
 
@@ -90,6 +92,7 @@ class ReconciliationFlowTests(unittest.TestCase):
         )
 
     def test_reconcile_all_statuses(self) -> None:
+        """Confere se a conciliacao consegue produzir todos os status possiveis."""
         internal_positions = [
             Position("OKAY3", 10, Decimal("100.00")),
             Position("QTDX3", 10, Decimal("100.00")),
@@ -113,6 +116,7 @@ class ReconciliationFlowTests(unittest.TestCase):
         self.assertEqual(statuses["NEWC3"], ReconciliationStatus.NAO_CADASTRADO)
 
     def test_financial_tolerance_boundary(self) -> None:
+        """Testa o limite da tolerancia financeira entre OK e erro financeiro."""
         internal_positions = [Position("ABCD3", 1, Decimal("10.000"))]
         custodian_positions = [
             CustodianPosition("ABCD3", "ABCD3", 1, Decimal("10.009")),
@@ -128,6 +132,7 @@ class ReconciliationFlowTests(unittest.TestCase):
         self.assertEqual(rows[0].status, ReconciliationStatus.ERRO_FINANCEIRO)
 
     def test_mapping_normalization_and_identity_fallback(self) -> None:
+        """Verifica normalizacao de nomes, reconhecimento de ticker e fallback sem cadastro."""
         mapping = load_name_mapping(Path("fixtures/custodian_mapping.json"))
 
         self.assertEqual(resolve_ticker("  vale   s.a.  ", mapping), "VALE3")
@@ -135,6 +140,7 @@ class ReconciliationFlowTests(unittest.TestCase):
         self.assertEqual(resolve_ticker("Ativo sem cadastro", mapping), "Ativo sem cadastro")
 
     def test_invalid_input_returns_friendly_error(self) -> None:
+        """Garante que entradas invalidas retornem erro amigavel pela interface de linha de comando."""
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
             internal_path = temp_path / "internal_system.json"
@@ -173,6 +179,7 @@ class ReconciliationFlowTests(unittest.TestCase):
         self.assertIn("Quantidade deve ser inteira", stderr_buffer.getvalue())
 
     def test_duplicate_rows_are_aggregated_by_ticker(self) -> None:
+        """Confirma que linhas duplicadas sao agregadas por ticker antes da conciliacao."""
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
             internal_path = temp_path / "internal_system.json"

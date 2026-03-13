@@ -16,6 +16,7 @@ FINANCIAL_TOLERANCE = Decimal("0.01")
 def reconcile_positions(
     internal_positions: list[Position], custodian_positions: list[CustodianPosition]
 ) -> list[ReconciliationRow]:
+    """Compara posicoes internas e do custodiante, gerando as divergencias por ticker."""
     internal_by_ticker = {position.ticker: position for position in internal_positions}
     custodian_by_ticker = {position.ticker: position for position in custodian_positions}
 

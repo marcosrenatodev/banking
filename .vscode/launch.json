@@ -1,0 +1,36 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug conciliador",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/conciliador.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "args": [
+        "--internal",
+        "fixtures/internal_system.json",
+        "--custodian",
+        "fixtures/custodian_extract.csv",
+        "--mapping",
+        "fixtures/custodian_mapping.json",
+        "--output",
+        "relatorio_final.csv"
+      ]
+    },
+    {
+      "name": "Debug testes",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "unittest",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "args": [
+        "discover",
+        "-s",
+        "tests"
+      ]
+    }
+  ]
+}

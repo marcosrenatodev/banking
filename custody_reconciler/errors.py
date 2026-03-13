@@ -1,2 +1,2 @@
 class ReconciliationError(Exception):
-    """Base error for controlled failures in the reconciliation flow."""
+    """Erro base para falhas controladas no fluxo de conciliacao."""

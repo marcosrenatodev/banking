@@ -66,7 +66,7 @@ def main(argv: list[str] | None = None) -> int:
     except ReconciliationError as exc:
         print(f"Erro: {exc}", file=sys.stderr)
         return 1
-    except Exception as exc:  # pragma: no cover - defensive guardrail
+    except Exception as exc: 
         LOGGER.error("Falha inesperada: %s", exc)
         return 1
 

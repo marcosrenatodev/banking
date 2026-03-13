@@ -12,14 +12,17 @@ _TICKER_PATTERN = re.compile(r"^[A-Z]{4,6}\d{1,2}[A-Z]?$")
 
 
 def normalize_name(name: str) -> str:
+    """Normaliza nomes de ativos removendo espaços extras e padronizando em maiúsculas."""
     return _SPACE_PATTERN.sub(" ", name.strip().upper())
 
 
 def looks_like_ticker(value: str) -> bool:
+    """Retorna se o valor informado segue o padrão esperado de ticker brasileiro."""
     return bool(_TICKER_PATTERN.fullmatch(normalize_name(value).replace(" ", "")))
 
 
 def load_name_mapping(path: Path) -> dict[str, str]:
+    """Carrega um JSON de apelidos de ativos para tickers, validando e normalizando as chaves."""
     if not path.exists():
         raise ReconciliationError(f"Arquivo de mapping não encontrado: {path}")
 
@@ -58,6 +61,7 @@ def load_name_mapping(path: Path) -> dict[str, str]:
 
 
 def resolve_ticker(asset_name: str, name_mapping: dict[str, str]) -> str:
+    """Resolve o ticker pelo mapping ou reaproveita um ticker valido ja informado no nome do ativo."""
     normalized_name = normalize_name(asset_name)
     if normalized_name in name_mapping:
         return name_mapping[normalized_name]
